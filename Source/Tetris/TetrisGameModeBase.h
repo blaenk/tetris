@@ -14,7 +14,6 @@ class TETRIS_API ATetrisGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	
-	
-	
+public:
+  ATetrisGameModeBase();
 };

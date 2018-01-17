@@ -2,6 +2,12 @@
 
 #include "TetrisGameModeBase.h"
 
+#include "TetrisPlayerController.h"
+#include "Board.h"
 
-
+ATetrisGameModeBase::ATetrisGameModeBase()
+{
+  this->DefaultPawnClass = ABoard::StaticClass();
+  this->PlayerControllerClass = ATetrisPlayerController::StaticClass();
+}
 
