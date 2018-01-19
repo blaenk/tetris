@@ -28,7 +28,7 @@ void ATetromino::BeginPlay()
   this->UpdateShape();
 }
 
-void ATetromino::ScheduleRotationTo(FRotator Rotation)
+void ATetromino::ScheduleRotationTo(const FRotator& Rotation)
 {
   this->IsRotating = true;
   this->TargetRotation = Rotation;
@@ -64,7 +64,7 @@ void ATetromino::InterpolateTargetRotation()
   }
 }
 
-void ATetromino::ScheduleTranslationTo(FVector Location)
+void ATetromino::ScheduleTranslationTo(const FVector& Location)
 {
   this->IsTranslating = true;
   this->TargetLocation = Location;
@@ -113,7 +113,7 @@ void ATetromino::Tick(float DeltaTime)
   this->InterpolateTargetRotation();
 }
 
-FVector ATetromino::LocationForPoint(const FIntPoint& point)
+FVector ATetromino::LocationForPoint(FIntPoint point)
 {
   const float OffsetY = point.X * ACell::SIZE;
   const float OffsetZ = point.Y * ACell::SIZE;
@@ -173,7 +173,7 @@ void ATetromino::Rotate()
   }
 }
 
-void ATetromino::MoveToLocation(FVector Location)
+void ATetromino::MoveToLocation(const FVector& Location)
 {
   this->ScheduleTranslationTo(Location);
 }

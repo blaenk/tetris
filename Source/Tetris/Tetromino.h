@@ -30,10 +30,8 @@ public:
   UFUNCTION(BlueprintCallable)
   void Rotate();
 
-  // TODO
-  // const FVector& everything.
   UFUNCTION(BlueprintCallable)
-  void MoveToLocation(FVector Location);
+  void MoveToLocation(const FVector& Location);
 
   const FShape& GetShape() const;
 
@@ -64,13 +62,15 @@ private:
   bool IsTranslating = false;
   FVector TargetLocation;
 
-  FVector LocationForPoint(const FIntPoint& point);
+  FVector LocationForPoint(FIntPoint point);
 
-  void ScheduleRotationTo(FRotator Rotation);
+  // TODO
+  // DRY These? Combine them into a single FTransform interpolation?
+  void ScheduleRotationTo(const FRotator& Rotation);
   void InterpolateTargetRotation();
   void StopRotating();
 
-  void ScheduleTranslationTo(FVector Location);
+  void ScheduleTranslationTo(const FVector& Location);
   void InterpolateTargetTranslation();
   void StopTranslating();
 
