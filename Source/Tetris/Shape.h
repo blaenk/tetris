@@ -29,6 +29,8 @@ enum class EShapeType : uint8
 class FShape
 {
 public:
+  // Delete the default constructor.
+  // This forces the user to choose a particular shape type.
   FShape() = delete;
 
   FShape(EShapeType ShapeType);
