@@ -103,15 +103,13 @@ void ABoard::SpawnBorderCellAt(FIntPoint Point)
 
 void ABoard::SpawnBorder()
 {
-  // Draw the left vertical.
+  // Draw the verticals.
   for (int i = 0; i < this->Rows; ++i)
   {
+    // Left vertical.
     this->SpawnBorderCellAt({ -1 * ACell::SIZE, i * ACell::SIZE });
-  }
 
-  // Draw the right vertical.
-  for (int i = 0; i < this->Rows; ++i)
-  {
+    // Right vertical.
     this->SpawnBorderCellAt({ this->Columns * ACell::SIZE, i * ACell::SIZE });
   }
 
