@@ -6,22 +6,6 @@
 #include "GameFramework/Pawn.h"
 #include "Board.generated.h"
 
-// TODO
-// Is UMETA necessary?
-// Does it pick up the name of the enumeration by default?
-
-/*
-* Enumeration for each movement direction.
-*/
-UENUM(BlueprintType)
-enum class EDirection : uint8
-{
-  Up    UMETA(DisplayName = "Up"),
-  Right UMETA(DisplayName = "Right"),
-  Down  UMETA(DisplayName = "Down"),
-  Left  UMETA(DisplayName = "Left")
-};
-
 UCLASS()
 class TETRIS_API ABoard : public APawn
 {
@@ -54,9 +38,6 @@ protected:
   // The Tetromino that was previously held.
   UPROPERTY(BlueprintReadOnly)
   class ATetromino* HeldTetromino = nullptr;
-
-  // TODO
-  // Consider spawning the full grid and using SetActorHiddenInGame?
 
   // Build the whole board or just the sides?
   TArray<class ACell*> Border;
