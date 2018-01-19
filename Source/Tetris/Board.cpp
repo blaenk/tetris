@@ -129,13 +129,13 @@ FVector ABoard::BoardToLocal(FIntPoint Location)
   return FVector(0, Location.X * ACell::SIZE, Location.Y * ACell::SIZE);
 }
 
-bool ABoard::IsValidLocation(FIntPoint Location)
+bool ABoard::IsValidLocation(FIntPoint Location) const
 {
   return (Location.X >= 0 && Location.X < this->Columns) &&
          (Location.Y >= 0 && Location.Y < this->Rows);
 }
 
-ACell* ABoard::GetCellAtLocation(FIntPoint Location)
+ACell* ABoard::GetCellAtLocation(FIntPoint Location) const
 {
   if (!this->IsValidLocation(Location))
   {
@@ -147,11 +147,9 @@ ACell* ABoard::GetCellAtLocation(FIntPoint Location)
   return this->Cells[singleDimensionIndex];
 }
 
-// TODO
-// DRY these.
-bool ABoard::CanMoveToLocation(FIntPoint Location)
+bool ABoard::CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const
 {
-  for (const auto &point : this->CurrentTetromino->GetShape().GetPoints())
+  for (const auto &point : Points)
   {
     FIntPoint MovedPoint = Location + point;
 
@@ -171,26 +169,16 @@ bool ABoard::CanMoveToLocation(FIntPoint Location)
   return true;
 }
 
+bool ABoard::CanMoveToLocation(FIntPoint Location)
+{
+  return this->CollidesAtLocation(Location,
+                                  this->CurrentTetromino->GetShape().GetPoints());
+}
+
 bool ABoard::CanRotate()
 {
-  for (const auto &point : this->CurrentTetromino->GetShape().GetPointsFromNextRotation())
-  {
-    FIntPoint MovedPoint = this->TetrominoLocation + point;
-
-    if (!this->IsValidLocation(MovedPoint))
-    {
-      return false;
-    }
-
-    ACell* CellAtPoint = this->GetCellAtLocation(MovedPoint);
-
-    if (CellAtPoint)
-    {
-      return false;
-    }
-  }
-
-  return true;
+  return this->CollidesAtLocation(this->TetrominoLocation,
+                                  this->CurrentTetromino->GetShape().GetPointsFromNextRotation());
 }
 
 void ABoard::MovePieceToLocation(FIntPoint Location)

@@ -80,9 +80,12 @@ private:
   void SpawnBorder();
 
   FVector BoardToLocal(FIntPoint Location);
-  ACell* GetCellAtLocation(FIntPoint Location);
+  ACell* GetCellAtLocation(FIntPoint Location) const;
 
-  bool IsValidLocation(FIntPoint Location);
+  bool IsValidLocation(FIntPoint Location) const;
+
+  bool CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const;
+
   bool CanMoveToLocation(FIntPoint Location);
   bool CanRotate();
 
