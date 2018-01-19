@@ -124,31 +124,15 @@ void ABoard::SpawnBorder()
   this->SpawnBorderCellAt({ this->Columns * ACell::SIZE, -1 * ACell::SIZE });
 }
 
-// TODO
-// Should the board grid be zero-based or not?
-// It seems like it may be standard to be one-based
 FVector ABoard::BoardToLocal(FIntPoint Location)
 {
-  return FVector(0, (Location.X - 1) * ACell::SIZE, (Location.Y - 1) * ACell::SIZE);
+  return FVector(0, Location.X * ACell::SIZE, Location.Y * ACell::SIZE);
 }
 
 bool ABoard::IsValidLocation(FIntPoint Location)
 {
-  if (Location.X < 1 || Location.X > this->Columns)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("Invalid X Location '%d'"), Location.X);
-
-    return false;
-  }
-
-  if (Location.Y < 1 || Location.Y > this->Rows)
-  {
-    UE_LOG(LogTemp, Warning, TEXT("Invalid Y Location '%d'"), Location.Y);
-
-    return false;
-  }
-
-  return true;
+  return (Location.X >= 0 && Location.X < this->Columns) &&
+         (Location.Y >= 0 && Location.Y < this->Rows);
 }
 
 ACell* ABoard::GetCellAtLocation(FIntPoint Location)
@@ -158,9 +142,7 @@ ACell* ABoard::GetCellAtLocation(FIntPoint Location)
     return nullptr;
   }
 
-  // TODO
-  // Backing array is zero-based, grid is one-based.
-  const int singleDimensionIndex = (Location.X - 1) + (Location.Y - 1) * this->Columns;
+  const int singleDimensionIndex = Location.X + Location.Y * this->Columns;
 
   return this->Cells[singleDimensionIndex];
 }

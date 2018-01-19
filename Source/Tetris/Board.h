@@ -42,10 +42,10 @@ protected:
   int Rows = 20;
 
   UPROPERTY(EditAnywhere)
-  FIntPoint StartingPosition = FIntPoint{6, 20};
+  FIntPoint StartingPosition = FIntPoint{ 5, 19 };
 
   UPROPERTY(EditAnywhere)
-  FIntPoint TetrominoLocation = FIntPoint{ 6, 20 };
+  FIntPoint TetrominoLocation = FIntPoint{ 5, 19 };
 
   // The Tetromino currently being dropped.
   UPROPERTY(BlueprintReadOnly)
