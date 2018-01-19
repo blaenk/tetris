@@ -129,7 +129,7 @@ FVector ABoard::BoardToLocal(FIntPoint Location)
   return FVector(0, Location.X * ACell::SIZE, Location.Y * ACell::SIZE);
 }
 
-bool ABoard::IsValidLocation(FIntPoint Location) const
+bool ABoard::IsLocationWithinBounds(FIntPoint Location) const
 {
   return (Location.X >= 0 && Location.X < this->Columns) &&
          (Location.Y >= 0 && Location.Y < this->Rows);
@@ -137,7 +137,7 @@ bool ABoard::IsValidLocation(FIntPoint Location) const
 
 ACell* ABoard::GetCellAtLocation(FIntPoint Location) const
 {
-  if (!this->IsValidLocation(Location))
+  if (!this->IsLocationWithinBounds(Location))
   {
     return nullptr;
   }
@@ -153,7 +153,7 @@ bool ABoard::CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Poi
   {
     FIntPoint MovedPoint = Location + point;
 
-    if (!this->IsValidLocation(MovedPoint))
+    if (!this->IsLocationWithinBounds(MovedPoint))
     {
       return false;
     }

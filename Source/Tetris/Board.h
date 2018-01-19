@@ -82,7 +82,7 @@ private:
   FVector BoardToLocal(FIntPoint Location);
   ACell* GetCellAtLocation(FIntPoint Location) const;
 
-  bool IsValidLocation(FIntPoint Location) const;
+  bool IsLocationWithinBounds(FIntPoint Location) const;
 
   bool CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const;
 
