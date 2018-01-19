@@ -36,9 +36,11 @@ public:
   /**
   * Rotate in 90 degree increments.
   *
-  * CCW by default, or CW if -1 is passed for the `direction`.
+  * Returns whether a rotation did in fact occur.
   */
-  void Rotate(int direction = 1);
+  bool Rotate();
+
+  int GetRotation() const;
 
   int RotationCount() const;
   int PointCount() const;

@@ -238,6 +238,9 @@ void ABoard::MovePieceRight()
 
 void ABoard::RotatePiece()
 {
+  // TODO
+  // Reconcile the difference between this having the check externalized
+  // and the above having the checks internalized.
   if (this->CanRotate())
   {
     this->CurrentTetromino->Rotate();

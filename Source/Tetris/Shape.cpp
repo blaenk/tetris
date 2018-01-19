@@ -36,23 +36,31 @@ FShape::FShape(EShapeType ShapeType) : ShapeType(ShapeType)
   }
 }
 
+int FShape::GetRotation() const
+{
+  return -(this->Rotation * 90);
+}
+
 int FShape::RotationCount() const
 {
   return this->Points.Num();
 }
 
-void FShape::Rotate(int direction)
+bool FShape::Rotate()
 {
   const int Num = this->RotationCount();
 
   // In the case of the O shape, no rotation ever occurs.
   // Might as well generalize it to the rotation count here.
-  if (Num == 0)
+  if (Num == 1)
   {
-    return;
+    return false;
   }
 
-  this->Rotation = (this->Rotation + direction) % Num;
+  // Otherwise cycle through all rotations.
+  this->Rotation = (this->Rotation + 1) % Num;
+
+  return true;
 }
 
 const TArray<FIntPoint>& FShape::GetPoints() const

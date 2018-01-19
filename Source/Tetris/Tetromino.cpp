@@ -5,6 +5,8 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 
+#include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+
 #include "Cell.h"
 #include "Shape.h"
 
@@ -26,10 +28,48 @@ void ATetromino::BeginPlay()
   this->UpdateShape();
 }
 
+void ATetromino::ScheduleRotationTo(FRotator Rotation)
+{
+  this->IsRotating = true;
+  this->TargetRotation = Rotation;
+}
+
+void ATetromino::StopRotating()
+{
+  this->IsRotating = false;
+  this->TargetRotation = FRotator::ZeroRotator;
+}
+
+void ATetromino::InterpolateTargetRotation()
+{
+  if (!this->IsRotating)
+  {
+    return;
+  }
+
+  FRotator Current = this->GetActorRotation();
+
+  // FRotator Interpolation = FMath::RInterpConstantTo(Current, this->TargetRotation, GetWorld()->GetDeltaSeconds(), 360.0);
+  FRotator Interpolation = FMath::RInterpTo(Current, this->TargetRotation, GetWorld()->GetDeltaSeconds(), 50.0);
+
+  if (Interpolation.Equals(Current, 0.001))
+  {
+    this->SetActorRotation(this->TargetRotation);
+
+    this->StopRotating();
+  }
+  else
+  {
+    this->SetActorRotation(Interpolation);
+  }
+}
+
 // Called every frame
 void ATetromino::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+  this->InterpolateTargetRotation();
 }
 
 FVector ATetromino::LocationForPoint(const FIntPoint& point)
@@ -84,12 +124,12 @@ void ATetromino::SetCellLocations()
   }
 }
 
-// TODO
-// Just literally rotate it? But care for rotation origin.
 void ATetromino::Rotate()
 {
-  this->Shape.Rotate();
-  this->SetCellLocations();
+  if (this->Shape.Rotate())
+  {
+    this->ScheduleRotationTo(FRotator(0, 0, this->Shape.GetRotation()));
+  }
 }
 
 void ATetromino::UpdateShape()

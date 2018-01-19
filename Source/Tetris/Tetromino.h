@@ -56,8 +56,15 @@ private:
   // The individual ACell instances for each filled-cell position.
   TArray<class ACell*> Cells;
 
+  bool IsRotating = false;
+  FRotator TargetRotation;
+
   FVector LocationForPoint(const FIntPoint& point);
   void SpawnCells();
+  void ScheduleRotationTo(FRotator Rotation);
+  void InterpolateTargetRotation();
+  void StopRotating();
+
   void UpdateShape();
   void SetCellLocations();
 
