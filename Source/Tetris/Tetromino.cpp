@@ -64,11 +64,52 @@ void ATetromino::InterpolateTargetRotation()
   }
 }
 
+void ATetromino::ScheduleTranslationTo(FVector Location)
+{
+  this->IsTranslating = true;
+  this->TargetLocation = Location;
+}
+
+void ATetromino::StopTranslating()
+{
+  this->IsTranslating = false;
+  this->TargetLocation = FVector::ZeroVector;
+}
+
+void ATetromino::InterpolateTargetTranslation()
+{
+  if (!this->IsTranslating)
+  {
+    return;
+  }
+
+  FVector Current = this->GetActorLocation();
+
+  // FVector Interpolation = FMath::VInterpConstantTo(Current, this->TargetLocation, GetWorld()->GetDeltaSeconds(), 360.0);
+  FVector Interpolation = FMath::VInterpTo(Current, this->TargetLocation, GetWorld()->GetDeltaSeconds(), 50.0);
+
+  if (Interpolation.Equals(Current, 0.001))
+  {
+    this->SetActorLocation(this->TargetLocation);
+
+    this->StopTranslating();
+  }
+  else
+  {
+    this->SetActorLocation(Interpolation);
+  }
+}
+
 // Called every frame
 void ATetromino::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+  // TODO
+  // Should these somehow be combined into a single FTransform interpolation?
+  // Should these instead expose ways of working with Blueprint Timelines?
+  // Does FTimeline help in any way?
+  this->InterpolateTargetTranslation();
   this->InterpolateTargetRotation();
 }
 
@@ -132,16 +173,19 @@ void ATetromino::Rotate()
   }
 }
 
-void ATetromino::UpdateShape()
+void ATetromino::MoveToLocation(FVector Location)
 {
-  this->Shape = FShape{ this->ShapeType };
-  this->SpawnCells();
+  this->ScheduleTranslationTo(Location);
 }
 
-void ATetromino::SetShapeType(EShapeType ShapeType)
+void ATetromino::UpdateShape()
 {
-  this->ShapeType = ShapeType;
-  this->UpdateShape();
+  this->SetActorRotation(FRotator::ZeroRotator);
+
+  this->StopRotating();
+
+  this->Shape = FShape{ this->ShapeType };
+  this->SpawnCells();
 }
 
 #if WITH_EDITOR

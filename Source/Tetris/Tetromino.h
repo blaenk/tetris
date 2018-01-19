@@ -30,8 +30,10 @@ public:
   UFUNCTION(BlueprintCallable)
   void Rotate();
 
+  // TODO
+  // const FVector& everything.
   UFUNCTION(BlueprintCallable)
-  void SetShapeType(EShapeType ShapeType);
+  void MoveToLocation(FVector Location);
 
   const FShape& GetShape() const;
 
@@ -59,13 +61,22 @@ private:
   bool IsRotating = false;
   FRotator TargetRotation;
 
+  bool IsTranslating = false;
+  FVector TargetLocation;
+
   FVector LocationForPoint(const FIntPoint& point);
-  void SpawnCells();
+
   void ScheduleRotationTo(FRotator Rotation);
   void InterpolateTargetRotation();
   void StopRotating();
 
+  void ScheduleTranslationTo(FVector Location);
+  void InterpolateTargetTranslation();
+  void StopTranslating();
+
   void UpdateShape();
+
+  void SpawnCells();
   void SetCellLocations();
 
 #if WITH_EDITOR

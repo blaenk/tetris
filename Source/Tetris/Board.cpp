@@ -217,7 +217,7 @@ void ABoard::MovePieceToLocation(FIntPoint Location)
   {
     this->TetrominoLocation = Location;
 
-    this->CurrentTetromino->SetActorLocation(this->BoardToLocal(Location));
+    this->CurrentTetromino->MoveToLocation(this->BoardToLocal(Location));
   }
 }
 
