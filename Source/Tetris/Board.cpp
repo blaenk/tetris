@@ -169,13 +169,13 @@ bool ABoard::CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Poi
   return true;
 }
 
-bool ABoard::CanMoveToLocation(FIntPoint Location)
+bool ABoard::CanMoveToLocation(FIntPoint Location) const
 {
   return this->CollidesAtLocation(Location,
                                   this->CurrentTetromino->GetShape().GetPoints());
 }
 
-bool ABoard::CanRotate()
+bool ABoard::CanRotate() const
 {
   return this->CollidesAtLocation(this->TetrominoLocation,
                                   this->CurrentTetromino->GetShape().GetPointsFromNextRotation());

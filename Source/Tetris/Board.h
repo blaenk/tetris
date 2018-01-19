@@ -86,8 +86,8 @@ private:
 
   bool CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const;
 
-  bool CanMoveToLocation(FIntPoint Location);
-  bool CanRotate();
+  bool CanMoveToLocation(FIntPoint Location) const;
+  bool CanRotate() const;
 
   void MovePieceToLocation(FIntPoint Location);
 };
