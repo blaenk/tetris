@@ -57,13 +57,13 @@ void ABoard::BeginPlay()
 
   // TODO
   // This is hardcoding the first player controller? What about extra networked controllers?
-  ATetrisPlayerController* Controller = Cast<ATetrisPlayerController>(this->GetWorld()->GetFirstPlayerController());
+  APlayerController* PlayerController = this->GetWorld()->GetFirstPlayerController();
 
-  if (Controller)
+  if (PlayerController)
   {
-    Controller->SetViewTarget(this);
+    PlayerController->SetViewTarget(this);
 
-    this->EnableInput(Controller);
+    this->EnableInput(PlayerController);
   }
 
   this->SpawnBorder();
@@ -264,11 +264,11 @@ void ABoard::DropTick()
     {
       UE_LOG(LogTemp, Error, TEXT("Game Over!"));
 
-      ATetrisPlayerController* const MyPlayer = Cast<ATetrisPlayerController>(this->GetWorld()->GetFirstPlayerController());
+      APlayerController* const PlayerController = this->GetWorld()->GetFirstPlayerController();
 
-      if (MyPlayer)
+      if (PlayerController)
       {
-        MyPlayer->SetPause(true);
+        PlayerController->SetPause(true);
       }
     }
   }
