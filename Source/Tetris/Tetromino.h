@@ -33,6 +33,12 @@ public:
   UFUNCTION(BlueprintCallable)
   void MoveToLocation(const FVector& Location);
 
+  UFUNCTION(BlueprintCallable)
+  void Reset();
+
+  UFUNCTION(BlueprintCallable)
+  void SetRandomShape();
+
   const FShape& GetShape() const;
 
 protected:

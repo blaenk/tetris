@@ -42,6 +42,8 @@ public:
   */
   bool Rotate();
 
+  void ResetRotation();
+
   int GetRotation() const;
 
   int RotationCount() const;

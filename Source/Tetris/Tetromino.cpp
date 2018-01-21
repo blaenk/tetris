@@ -173,6 +173,14 @@ void ATetromino::Rotate()
   }
 }
 
+void ATetromino::Reset()
+{
+  this->Shape.ResetRotation();
+  this->StopRotating();
+  this->StopTranslating();
+  this->SetActorRotation(FRotator::ZeroRotator);
+}
+
 void ATetromino::MoveToLocation(const FVector& Location)
 {
   this->ScheduleTranslationTo(Location);
@@ -180,11 +188,17 @@ void ATetromino::MoveToLocation(const FVector& Location)
 
 void ATetromino::UpdateShape()
 {
-  this->SetActorRotation(FRotator::ZeroRotator);
-
-  this->StopRotating();
-
+  this->Reset();
   this->Shape = FShape{ this->ShapeType };
+  this->SpawnCells();
+}
+
+void ATetromino::SetRandomShape()
+{
+  EShapeType RandomShape = static_cast<EShapeType>(FMath::RandRange(0, static_cast<int>(EShapeType::SHAPE_Z)));
+
+  this->Reset();
+  this->Shape = FShape{ RandomShape };
   this->SpawnCells();
 }
 

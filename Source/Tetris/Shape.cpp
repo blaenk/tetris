@@ -36,6 +36,11 @@ FShape::FShape(EShapeType ShapeType) : ShapeType(ShapeType)
   }
 }
 
+void FShape::ResetRotation()
+{
+  this->Rotation = 0;
+}
+
 int FShape::GetRotation() const
 {
   return -(this->Rotation * 90);
