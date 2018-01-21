@@ -49,7 +49,7 @@ protected:
   TArray<class ACell*> Cells;
 
   UPROPERTY(EditAnywhere)
-  int InitialLevel = 0;
+  int InitialLevel = 1;
 
   UPROPERTY(EditAnywhere)
   class USceneComponent* Scene = nullptr;
