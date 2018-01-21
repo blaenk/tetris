@@ -49,6 +49,9 @@ protected:
   TArray<class ACell*> Cells;
 
   UPROPERTY(EditAnywhere)
+  int InitialLevel = 0;
+
+  UPROPERTY(EditAnywhere)
   class USceneComponent* Scene = nullptr;
 
   UPROPERTY(EditAnywhere)
@@ -80,8 +83,13 @@ public:
 
 private:
   FTimerHandle DropTimerHandle;
+  int CompletedRows = 0;
 
   void DropTick();
+
+  int EarnedLevel() const;
+  int ActualLevel() const;
+  float GetCountdown() const;
 
   void SpawnBorderCellAt(FIntPoint Location);
   void SpawnBorder();

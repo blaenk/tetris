@@ -74,9 +74,34 @@ void ABoard::BeginPlay()
 
   this->MovePieceToLocation(this->StartingPosition);
 
-  const float Countdown = (0.05f * (11 - this->Level));
+  const float Countdown = this->GetCountdown();
+  this->GetWorldTimerManager().SetTimer(this->DropTimerHandle, this, &ABoard::DropTick, Countdown, false, Countdown);
+}
 
-  this->GetWorldTimerManager().SetTimer(this->DropTimerHandle, this, &ABoard::DropTick, Countdown, true, Countdown);
+int ABoard::EarnedLevel() const
+{
+  if (this->CompletedRows <= 0)
+  {
+    return 1;
+  }
+  else if (this->CompletedRows >= 1 && this->CompletedRows <= 90)
+  {
+    return 1 + (this->CompletedRows - 1) / 10;
+  }
+  else
+  {
+    return 10;
+  }
+}
+
+int ABoard::ActualLevel() const
+{
+  return FMath::Max(this->InitialLevel, this->EarnedLevel());
+}
+
+float ABoard::GetCountdown() const
+{
+  return 0.05f * (11 - this->ActualLevel());
 }
 
 FVector ABoard::BoardLocationToLocalSpace(FIntPoint Location) const
@@ -206,6 +231,8 @@ void ABoard::ClearRow(int Row)
   {
     this->ShiftRowDown(i);
   }
+
+  ++this->CompletedRows;
 }
 
 // TODO
@@ -272,6 +299,9 @@ void ABoard::DropTick()
       }
     }
   }
+
+  const float Countdown = this->GetCountdown();
+  this->GetWorldTimerManager().SetTimer(this->DropTimerHandle, this, &ABoard::DropTick, Countdown);
 }
 
 // Called every frame
