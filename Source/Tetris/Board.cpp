@@ -4,11 +4,13 @@
 
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Pawn.h"
+#include "Runtime/Engine/Public/TimerManager.h"
 
 #include "Runtime/Engine/Classes/Camera/CameraComponent.h"
 
 #include "Cell.h"
 #include "Tetromino.h"
+#include "TetrisPlayerController.h"
 
 // Sets default values
 ABoard::ABoard()
@@ -40,7 +42,7 @@ ABoard::ABoard()
   // TODO
   // Center this based on the center of the board
   // Use cameramanager to optimize this?
-  FVector CameraCenter = this->BoardToLocal({ this->Columns / 2, this->Rows / 2 });
+  FVector CameraCenter = this->BoardLocationToLocalSpace({ this->Columns / 2, this->Rows / 2 });
   CameraCenter.X = -220;
 
   this->Camera->SetRelativeLocation(CameraCenter);
@@ -68,8 +70,208 @@ void ABoard::BeginPlay()
 
   this->CurrentTetromino = this->GetWorld()->SpawnActor<ATetromino>(ATetromino::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
   this->CurrentTetromino->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+  this->CurrentTetromino->SetRandomShape();
 
   this->MovePieceToLocation(this->StartingPosition);
+
+  const float Countdown = (0.05f * (11 - this->Level));
+
+  this->GetWorldTimerManager().SetTimer(this->DropTimerHandle, this, &ABoard::DropTick, Countdown, true, Countdown);
+}
+
+FVector ABoard::BoardLocationToLocalSpace(FIntPoint Location) const
+{
+  return FVector(0, Location.X * ACell::SIZE, Location.Y * ACell::SIZE);
+}
+
+bool ABoard::IsLocationWithinBounds(FIntPoint Location) const
+{
+  return FMath::IsWithin(Location.X, 0, this->Columns) &&
+         FMath::IsWithin(Location.Y, 0, this->Rows);
+}
+
+int ABoard::PointToIndex(FIntPoint Location) const
+{
+  return Location.X + Location.Y * this->Columns;
+}
+
+ACell* ABoard::GetCellAtLocation(FIntPoint Location) const
+{
+  if (this->IsLocationWithinBounds(Location))
+  {
+    return this->Cells[this->PointToIndex(Location)];
+  }
+
+  return nullptr;
+}
+
+void ABoard::SetCellAtLocation(FIntPoint Location, ACell* Cell)
+{
+  if (this->IsLocationWithinBounds(Location))
+  {
+    this->Cells[this->PointToIndex(Location)] = Cell;
+  }
+}
+
+void ABoard::FillCellAtLocation(FIntPoint Location)
+{
+  if (this->IsLocationWithinBounds(Location) && !this->GetCellAtLocation(Location))
+  {
+    ACell* Cell = this->GetWorld()->SpawnActor<ACell>(ACell::StaticClass(), this->BoardLocationToLocalSpace(Location), FRotator::ZeroRotator);
+
+    Cell->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+    this->SetCellAtLocation(Location, Cell);
+  }
+}
+
+void ABoard::ClearCellAtLocation(FIntPoint Location)
+{
+  if (this->IsLocationWithinBounds(Location))
+  {
+    this->Cells[this->PointToIndex(Location)] = nullptr;
+  }
+}
+
+void ABoard::DestroyCellAtLocation(FIntPoint Location)
+{
+  if (this->IsLocationWithinBounds(Location))
+  {
+    ACell* Cell = this->GetCellAtLocation(Location);
+
+    if (Cell)
+    {
+      Cell->Destroy();
+    }
+  }
+}
+
+bool ABoard::IsRowFull(int Row) const
+{
+  for (int j = 0; j < this->Columns; ++j)
+  {
+    if (!this->GetCellAtLocation({ j, Row }))
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void ABoard::ShiftRowDown(int Row)
+{
+  if (Row == 0)
+  {
+    return;
+  }
+
+  for (int i = 0; i < this->Columns; ++i)
+  {
+    FIntPoint Location{ i, Row };
+    FIntPoint NewLocation = Location + FIntPoint{ 0, -1 };
+
+    ACell* Cell = this->GetCellAtLocation(Location);
+
+    if (Cell)
+    {
+      // Move the cell to its new location in the grid.
+      this->ClearCellAtLocation(Location);
+      this->SetCellAtLocation(NewLocation, Cell);
+
+      // TODO
+      // Add Translation Interpolation to ACell.
+      // Perhaps make them a component? Does UMovementComponent do this?
+      // Cell->MoveToLocation({ i, Row - 1 });
+
+      // Move the cell to its new board-local location.
+      Cell->SetActorLocation(this->BoardLocationToLocalSpace(NewLocation));
+    }
+  }
+}
+
+void ABoard::ClearRow(int Row)
+{
+  // Clear each cell in this row.
+  for (int i = 0; i < this->Columns; ++i)
+  {
+    FIntPoint Location{ i, Row };
+
+    this->DestroyCellAtLocation(Location);
+    this->ClearCellAtLocation(Location);
+  }
+
+  // Go through each successively higher row and shift each cell down by one row.
+  for (int i = Row + 1; i < this->Rows; ++i)
+  {
+    this->ShiftRowDown(i);
+  }
+}
+
+// TODO
+// Should each row be removed one by one, or should the longest
+// contiguous gap be removed as a whole?
+// TODO
+// Potential optimization is to only consider rows >= the lowest row the piece touches.
+// Likely unnecessary.
+void ABoard::ClearFullRows()
+{
+  for (int i = 0; i < this->Rows; ++i)
+  {
+    // Consider two full rows. The first one is cleared and the second one
+    // is shifted into the first row's position, so the first row is again full
+    // and must be cleared again.
+    while (this->IsRowFull(i))
+    {
+      this->ClearRow(i);
+    }
+  }
+}
+
+void ABoard::DrawPieceToBoard()
+{
+  for (const auto &point : this->CurrentTetromino->GetShape().GetPoints())
+  {
+    FIntPoint BoardPoint = this->TetrominoLocation + point;
+
+    this->FillCellAtLocation(BoardPoint);
+  }
+}
+
+// TODO
+// Implement "empty" ticks, such as after landing a piece.
+void ABoard::DropTick()
+{
+  if (this->CanMoveToLocation(this->TetrominoLocation + FIntPoint{ 0, -1 }))
+  {
+    this->MovePieceDown();
+  }
+  else
+  {
+    this->DrawPieceToBoard();
+
+    this->ClearFullRows();
+
+    // Set a new random shape and move it to the starting position.
+    // If it doesn't fit in the starting position, it's game over.
+    this->CurrentTetromino->SetRandomShape();
+
+    if (this->CanMoveToLocation(this->StartingPosition))
+    {
+      this->MovePieceToLocation(this->StartingPosition);
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Game Over!"));
+
+      ATetrisPlayerController* const MyPlayer = Cast<ATetrisPlayerController>(this->GetWorld()->GetFirstPlayerController());
+
+      if (MyPlayer)
+      {
+        MyPlayer->SetPause(true);
+      }
+    }
+  }
 }
 
 // Called every frame
@@ -126,61 +328,33 @@ void ABoard::SpawnBorder()
   this->SpawnBorderCellAt({ this->Columns * ACell::SIZE, -1 * ACell::SIZE });
 }
 
-FVector ABoard::BoardToLocal(FIntPoint Location)
-{
-  return FVector(0, Location.X * ACell::SIZE, Location.Y * ACell::SIZE);
-}
-
-bool ABoard::IsLocationWithinBounds(FIntPoint Location) const
-{
-  return (Location.X >= 0 && Location.X < this->Columns) &&
-         (Location.Y >= 0 && Location.Y < this->Rows);
-}
-
-ACell* ABoard::GetCellAtLocation(FIntPoint Location) const
-{
-  if (!this->IsLocationWithinBounds(Location))
-  {
-    return nullptr;
-  }
-
-  const int singleDimensionIndex = Location.X + Location.Y * this->Columns;
-
-  return this->Cells[singleDimensionIndex];
-}
-
 bool ABoard::CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const
 {
   for (const auto &point : Points)
   {
     FIntPoint MovedPoint = Location + point;
 
-    if (!this->IsLocationWithinBounds(MovedPoint))
+    if (!this->IsLocationWithinBounds(MovedPoint) || this->GetCellAtLocation(MovedPoint))
     {
-      return false;
-    }
-
-    ACell* CellAtPoint = this->GetCellAtLocation(MovedPoint);
-
-    if (CellAtPoint)
-    {
-      return false;
+      return true;
     }
   }
 
-  return true;
+  return false;
 }
 
 bool ABoard::CanMoveToLocation(FIntPoint Location) const
 {
-  return this->CollidesAtLocation(Location,
-                                  this->CurrentTetromino->GetShape().GetPoints());
+  const auto &Points = this->CurrentTetromino->GetShape().GetPoints();
+
+  return !this->CollidesAtLocation(Location, Points);
 }
 
 bool ABoard::CanRotate() const
 {
-  return this->CollidesAtLocation(this->TetrominoLocation,
-                                  this->CurrentTetromino->GetShape().GetPointsFromNextRotation());
+  const auto &Points = this->CurrentTetromino->GetShape().GetPointsFromNextRotation();
+
+  return !this->CollidesAtLocation(this->TetrominoLocation, Points);
 }
 
 void ABoard::MovePieceToLocation(FIntPoint Location)
@@ -189,7 +363,7 @@ void ABoard::MovePieceToLocation(FIntPoint Location)
   {
     this->TetrominoLocation = Location;
 
-    this->CurrentTetromino->MoveToLocation(this->BoardToLocal(Location));
+    this->CurrentTetromino->MoveToLocation(this->BoardLocationToLocalSpace(Location));
   }
 }
 

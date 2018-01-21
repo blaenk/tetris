@@ -26,6 +26,9 @@ protected:
   int Rows = 20;
 
   UPROPERTY(EditAnywhere)
+  int Level = 1;
+
+  UPROPERTY(EditAnywhere)
   FIntPoint StartingPosition = FIntPoint{ 5, 19 };
 
   UPROPERTY(EditAnywhere)
@@ -76,13 +79,29 @@ public:
   void SlamPieceDown();
 
 private:
+  FTimerHandle DropTimerHandle;
+
+  void DropTick();
+
   void SpawnBorderCellAt(FIntPoint Location);
   void SpawnBorder();
 
-  FVector BoardToLocal(FIntPoint Location);
-  ACell* GetCellAtLocation(FIntPoint Location) const;
-
+  int PointToIndex(FIntPoint Location) const;
+  FVector BoardLocationToLocalSpace(FIntPoint Location) const;
   bool IsLocationWithinBounds(FIntPoint Location) const;
+
+  ACell* GetCellAtLocation(FIntPoint Location) const;
+  void SetCellAtLocation(FIntPoint Location, ACell* Cell);
+  void ClearCellAtLocation(FIntPoint Location);
+  void DestroyCellAtLocation(FIntPoint Location);
+  void FillCellAtLocation(FIntPoint Location);
+
+  void DrawPieceToBoard();
+
+  bool IsRowFull(int Row) const;
+  void ShiftRowDown(int Row);
+  void ClearRow(int Row);
+  void ClearFullRows();
 
   bool CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Points) const;
 
