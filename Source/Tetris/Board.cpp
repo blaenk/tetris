@@ -53,7 +53,9 @@ void ABoard::BeginPlay()
 {
   Super::BeginPlay();
 
-  APlayerController* Controller = this->GetWorld()->GetFirstPlayerController();
+  // TODO
+  // This is hardcoding the first player controller? What about extra networked controllers?
+  ATetrisPlayerController* Controller = Cast<ATetrisPlayerController>(this->GetWorld()->GetFirstPlayerController());
 
   if (Controller)
   {
