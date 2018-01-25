@@ -22,6 +22,8 @@ ABoard::ABoard()
 
   this->Cells.SetNumZeroed(this->Rows * this->Columns, true);
 
+  this->NextTetrominoes.SetNumZeroed(this->ShowNextTetrominoCount);
+
   // The border requires:
   // * Two side verticals, as tall as there are rows
   // * The bottom horizontal, as wide as there are columns
@@ -50,6 +52,61 @@ ABoard::ABoard()
   this->Camera->SetAutoActivate(true);
 }
 
+void ABoard::CycleTetrominoes()
+{
+  this->CurrentTetromino->SetRandomShape();
+
+  if (this->NextTetrominoes.Num() > 0)
+  {
+    ATetromino* NewLast = this->CurrentTetromino;
+
+    this->NextTetrominoes[0]->MoveToLocation(this->CurrentTetromino->GetActorLocation());
+    this->CurrentTetromino = this->NextTetrominoes[0];
+    
+    const int Length = this->NextTetrominoes.Num();
+
+    for (int i = 1; i < Length; ++i)
+    {
+      this->NextTetrominoes[i]->MoveToLocation(this->NextTetrominoes[i - 1]->GetActorLocation());
+      this->NextTetrominoes[i - 1] = this->NextTetrominoes[i];
+    }
+
+    NewLast->MoveToLocation(this->NextTetrominoes[Length - 1]->GetActorLocation());
+    this->NextTetrominoes[Length - 1] = NewLast;
+  }
+}
+
+ATetromino* ABoard::SpawnTetromino(const FVector& Location)
+{
+  ATetromino* Tetromino = this->GetWorld()->SpawnActor<ATetromino>(ATetromino::StaticClass(), Location, FRotator::ZeroRotator);
+  Tetromino->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+  Tetromino->SetRandomShape();
+
+  return Tetromino;
+}
+
+void ABoard::SpawnNextTetrominoes()
+{
+  const int BorderWidth = 1;
+  const int Gap = 3;
+  const float OffsetY = (this->Columns + BorderWidth + Gap) * ACell::SIZE;
+  float OffsetZ = this->Rows * ACell::SIZE;
+
+  for (int i = 0; i < this->NextTetrominoes.Num(); ++i)
+  {
+    const FVector Location(0, OffsetY, OffsetZ);
+
+    this->NextTetrominoes[i] = this->SpawnTetromino(Location);
+
+    OffsetZ -= 40;
+  }
+}
+
+ATetromino* const ABoard::GetCurrentTetromino() const
+{
+  return this->CurrentTetromino;
+}
+
 // Called when the game starts or when spawned
 void ABoard::BeginPlay()
 {
@@ -68,9 +125,8 @@ void ABoard::BeginPlay()
 
   this->SpawnBorder();
 
-  this->CurrentTetromino = this->GetWorld()->SpawnActor<ATetromino>(ATetromino::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-  this->CurrentTetromino->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-  this->CurrentTetromino->SetRandomShape();
+  this->CurrentTetromino = this->SpawnTetromino();
+  this->SpawnNextTetrominoes();
 
   this->MovePieceToLocation(this->StartingPosition);
 
@@ -257,7 +313,7 @@ void ABoard::ClearFullRows()
 
 void ABoard::DrawPieceToBoard()
 {
-  for (const auto &point : this->CurrentTetromino->GetShape().GetPoints())
+  for (const auto &point : this->GetCurrentTetromino()->GetShape().GetPoints())
   {
     FIntPoint BoardPoint = this->TetrominoLocation + point;
 
@@ -280,9 +336,9 @@ void ABoard::DropTick()
     this->ClearFullRows();
 
     // Set a new random shape and move it to the starting position.
-    // If it doesn't fit in the starting position, it's game over.
-    this->CurrentTetromino->SetRandomShape();
+    this->CycleTetrominoes();
 
+    // If it doesn't fit in the starting position, it's game over.
     if (this->CanMoveToLocation(this->StartingPosition))
     {
       this->MovePieceToLocation(this->StartingPosition);
@@ -375,14 +431,14 @@ bool ABoard::CollidesAtLocation(FIntPoint Location, const TArray<FIntPoint> &Poi
 
 bool ABoard::CanMoveToLocation(FIntPoint Location) const
 {
-  const auto &Points = this->CurrentTetromino->GetShape().GetPoints();
+  const auto &Points = this->GetCurrentTetromino()->GetShape().GetPoints();
 
   return !this->CollidesAtLocation(Location, Points);
 }
 
 bool ABoard::CanRotate() const
 {
-  const auto &Points = this->CurrentTetromino->GetShape().GetPointsFromNextRotation();
+  const auto &Points = this->GetCurrentTetromino()->GetShape().GetPointsFromNextRotation();
 
   return !this->CollidesAtLocation(this->TetrominoLocation, Points);
 }
@@ -391,9 +447,11 @@ void ABoard::MovePieceToLocation(FIntPoint Location)
 {
   if (this->CanMoveToLocation(Location))
   {
+    // TODO
+    // If non-CurrentTetromino pieces are moved, this will clobber its location.
     this->TetrominoLocation = Location;
 
-    this->CurrentTetromino->MoveToLocation(this->BoardLocationToLocalSpace(Location));
+    this->GetCurrentTetromino()->MoveToLocation(this->BoardLocationToLocalSpace(Location));
   }
 }
 
@@ -416,7 +474,7 @@ void ABoard::RotatePiece()
 {
   if (this->CanRotate())
   {
-    this->CurrentTetromino->Rotate();
+    this->GetCurrentTetromino()->Rotate();
   }
 }
 

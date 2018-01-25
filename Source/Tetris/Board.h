@@ -29,6 +29,9 @@ protected:
   int Level = 1;
 
   UPROPERTY(EditAnywhere)
+  int ShowNextTetrominoCount = 4;
+
+  UPROPERTY(EditAnywhere)
   FIntPoint StartingPosition = FIntPoint{ 5, 19 };
 
   UPROPERTY(EditAnywhere)
@@ -38,9 +41,13 @@ protected:
   UPROPERTY(BlueprintReadOnly)
   class ATetromino* CurrentTetromino = nullptr;
 
-  // The Tetromino that was previously held.
+  // The Tetromino held Tetromino.
   UPROPERTY(BlueprintReadOnly)
   class ATetromino* HeldTetromino = nullptr;
+
+  // The queued Tetrominoes.
+  UPROPERTY(EditAnywhere)
+  TArray<class ATetromino*> NextTetrominoes;
 
   // Build the whole board or just the sides?
   TArray<class ACell*> Border;
@@ -93,13 +100,18 @@ private:
 
   void SpawnBorderCellAt(FIntPoint Location);
   void SpawnBorder();
+  class ATetromino* SpawnTetromino(const FVector& Location = FVector::ZeroVector);
+  void SpawnNextTetrominoes();
+
+  void CycleTetrominoes();
+  ATetromino* const GetCurrentTetromino() const;
 
   int PointToIndex(FIntPoint Location) const;
   FVector BoardLocationToLocalSpace(FIntPoint Location) const;
   bool IsLocationWithinBounds(FIntPoint Location) const;
 
-  ACell* GetCellAtLocation(FIntPoint Location) const;
-  void SetCellAtLocation(FIntPoint Location, ACell* Cell);
+  class ACell* GetCellAtLocation(FIntPoint Location) const;
+  void SetCellAtLocation(FIntPoint Location, class  ACell* Cell);
   void ClearCellAtLocation(FIntPoint Location);
   void DestroyCellAtLocation(FIntPoint Location);
   void FillCellAtLocation(FIntPoint Location);
