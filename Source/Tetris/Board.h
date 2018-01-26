@@ -86,6 +86,9 @@ public:
   void RotatePiece();
 
   UFUNCTION(BlueprintCallable)
+  void HoldPiece();
+
+  UFUNCTION(BlueprintCallable)
   void SlamPieceDown();
 
 private:

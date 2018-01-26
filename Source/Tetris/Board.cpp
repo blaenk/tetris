@@ -378,6 +378,8 @@ void ABoard::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 
     InputComponent->BindAction("Rotate Piece", IE_Pressed, this, &ABoard::RotatePiece);
 
+    InputComponent->BindAction("Hold Piece", IE_Pressed, this, &ABoard::HoldPiece);
+
     InputComponent->BindAction("Slam Piece Down", IE_Pressed, this, &ABoard::SlamPieceDown);
   }
 }
@@ -475,6 +477,31 @@ void ABoard::RotatePiece()
   if (this->CanRotate())
   {
     this->GetCurrentTetromino()->Rotate();
+  }
+}
+
+void ABoard::HoldPiece()
+{
+  if (this->HeldTetromino)
+  {
+    // Replace (?) the current tetromino with the held piece.
+    this->CurrentTetromino->Destroy();
+    this->CurrentTetromino = this->HeldTetromino;
+    this->MovePieceToLocation(this->StartingPosition);
+    this->HeldTetromino = nullptr;
+  }
+  else
+  {
+    // Save the current tetromino and cycle the tetrominoes.
+    this->CurrentTetromino->MoveToLocation(FVector(0, -50, 100));
+    this->HeldTetromino = this->CurrentTetromino;
+
+    // Need to reset piece position.
+    this->TetrominoLocation = this->StartingPosition;
+
+    // Need to spawn this into the last spot of the NextTetrominoes.
+    this->CurrentTetromino = this->SpawnTetromino(this->BoardLocationToLocalSpace(this->StartingPosition));
+    this->CycleTetrominoes();
   }
 }
 

@@ -121,17 +121,19 @@ FVector ATetromino::LocationForPoint(FIntPoint point)
   return { 0.0f, OffsetY, OffsetZ };
 }
 
+void ATetromino::DestroyCells()
+{
+  for (auto cell : this->Cells)
+  {
+    cell->Destroy();
+  }
+
+  this->Cells.Empty();
+}
+
 void ATetromino::SpawnCells()
 {
-  if (this->Cells.Num() > 0)
-  {
-    for (auto &&cell : this->Cells)
-    {
-      cell->Destroy();
-    }
-
-    this->Cells.Empty();
-  }
+  this->DestroyCells();
 
   for (auto &&point : this->Shape.GetPoints())
   {
@@ -141,6 +143,13 @@ void ATetromino::SpawnCells()
 
     this->Cells.Add(Cell);
   }
+}
+
+void ATetromino::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+  this->DestroyCells();
+
+  Super::EndPlay(EndPlayReason);
 }
 
 const FShape& ATetromino::GetShape() const
