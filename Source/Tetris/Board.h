@@ -94,6 +94,7 @@ public:
 private:
   FTimerHandle DropTimerHandle;
   int CompletedRows = 0;
+  bool UsedHeldPiece = false;
 
   void DropTick();
 

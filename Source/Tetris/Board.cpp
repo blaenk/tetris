@@ -334,6 +334,8 @@ void ABoard::DropTick()
   {
     this->DrawPieceToBoard();
 
+    this->UsedHeldPiece = false;
+
     this->ClearFullRows();
 
     // Set a new random shape and move it to the starting position.
@@ -485,11 +487,24 @@ void ABoard::HoldPiece()
 {
   if (this->HeldTetromino)
   {
-    // Replace (?) the current tetromino with the held piece.
-    this->CurrentTetromino->Destroy();
-    this->CurrentTetromino = this->HeldTetromino;
-    this->MovePieceToLocation(this->StartingPosition);
-    this->HeldTetromino = nullptr;
+    if (!this->UsedHeldPiece)
+    {
+      // Replace (?) the current tetromino with the held piece.
+      this->CurrentTetromino->MoveToLocation(this->HeldTetromino->GetActorLocation());
+
+      ATetromino* Temporary = this->HeldTetromino;
+      this->HeldTetromino = this->CurrentTetromino;
+      this->CurrentTetromino = Temporary;
+
+      this->MovePieceToLocation(this->StartingPosition);
+
+      this->UsedHeldPiece = true;
+    }
+    else
+    {
+      // TODO
+      // Show the user that they can't hold the piece that was just relinquished.
+    }
   }
   else
   {
