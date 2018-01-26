@@ -17,12 +17,11 @@ public:
 
   static const int SIZE = 10;
 
+  void SetMaterial(class UMaterialInstance* Material);
+
 protected:
-  // TODO
-  // Is this necessary? Can simply expose a SetColor() function?
-  // The color of this cell.
-  UPROPERTY()
-  FColor Color;
+  UPROPERTY(EditAnywhere)
+  class UMaterialInstance* Material = nullptr;
 
   UPROPERTY(EditAnywhere)
   class UStaticMeshComponent* Mesh = nullptr;

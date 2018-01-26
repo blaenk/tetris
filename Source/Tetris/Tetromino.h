@@ -41,13 +41,15 @@ public:
 
   const FShape& GetShape() const;
 
+  class UMaterialInstance* GetMaterial() const;
+
 protected:
   UPROPERTY(EditAnywhere)
   EShapeType ShapeType = EShapeType::SHAPE_J;
 
   // The Tetromino's color.
   UPROPERTY(EditAnywhere)
-  FColor Color = FColor(0, 0, 0);
+  class UMaterialInstance* Material;
 
   UPROPERTY(EditAnywhere)
   class USceneComponent* SceneComponent = nullptr;
@@ -63,6 +65,14 @@ private:
 
   // The individual ACell instances for each filled-cell position.
   TArray<class ACell*> Cells;
+
+  static class UMaterialInstance* MaterialCyan;
+  static class UMaterialInstance* MaterialBlue;
+  static class UMaterialInstance* MaterialOrange;
+  static class UMaterialInstance* MaterialYellow;
+  static class UMaterialInstance* MaterialGreen;
+  static class UMaterialInstance* MaterialPurple;
+  static class UMaterialInstance* MaterialRed;
 
   bool IsRotating = false;
   FRotator TargetRotation;
@@ -82,6 +92,7 @@ private:
   void InterpolateTargetTranslation();
   void StopTranslating();
 
+  void SetShape(EShapeType ShapeType);
   void UpdateShape();
 
   void DestroyCells();

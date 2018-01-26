@@ -26,6 +26,12 @@ ACell::ACell()
   }
 }
 
+void ACell::SetMaterial(UMaterialInstance* Material)
+{
+  this->Material = Material;
+  this->Mesh->SetMaterial(0, this->Material);
+}
+
 // Called when the game starts or when spawned
 void ACell::BeginPlay()
 {

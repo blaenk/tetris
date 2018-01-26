@@ -194,13 +194,14 @@ void ABoard::SetCellAtLocation(FIntPoint Location, ACell* Cell)
   }
 }
 
-void ABoard::FillCellAtLocation(FIntPoint Location)
+void ABoard::FillCellAtLocation(FIntPoint Location, class UMaterialInstance* Material)
 {
   if (this->IsLocationWithinBounds(Location) && !this->GetCellAtLocation(Location))
   {
     ACell* Cell = this->GetWorld()->SpawnActor<ACell>(ACell::StaticClass(), this->BoardLocationToLocalSpace(Location), FRotator::ZeroRotator);
 
     Cell->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+    Cell->SetMaterial(Material);
 
     this->SetCellAtLocation(Location, Cell);
   }
@@ -317,7 +318,7 @@ void ABoard::DrawPieceToBoard()
   {
     FIntPoint BoardPoint = this->TetrominoLocation + point;
 
-    this->FillCellAtLocation(BoardPoint);
+    this->FillCellAtLocation(BoardPoint, this->GetCurrentTetromino()->GetMaterial());
   }
 }
 

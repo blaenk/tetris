@@ -5,10 +5,22 @@
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h"
 
+#include "Runtime/Engine/Classes/Materials/MaterialInstance.h"
+
 #include "Runtime/Core/Public/Math/UnrealMathUtility.h"
+
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 
 #include "Cell.h"
 #include "Shape.h"
+
+UMaterialInstance* ATetromino::MaterialCyan = nullptr;
+UMaterialInstance* ATetromino::MaterialBlue = nullptr;
+UMaterialInstance* ATetromino::MaterialOrange = nullptr;
+UMaterialInstance* ATetromino::MaterialYellow = nullptr;
+UMaterialInstance* ATetromino::MaterialGreen = nullptr;
+UMaterialInstance* ATetromino::MaterialPurple = nullptr;
+UMaterialInstance* ATetromino::MaterialRed = nullptr;
 
 // Sets default values
 ATetromino::ATetromino()
@@ -18,6 +30,106 @@ ATetromino::ATetromino()
 
   this->SceneComponent = this->CreateDefaultSubobject<USceneComponent>(TEXT("Scene"));
   this->SetRootComponent(this->SceneComponent);
+
+  // TODO
+  // There must be a better way to do this.
+  if (!ATetromino::MaterialCyan)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindCyan(TEXT("MaterialInstanceConstant'/Game/MI_Cyan.MI_Cyan'"));
+
+    if (FindCyan.Succeeded())
+    {
+      ATetromino::MaterialCyan = FindCyan.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Cyan."));
+    }
+  }
+
+  if (!ATetromino::MaterialBlue)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindBlue(TEXT("MaterialInstanceConstant'/Game/MI_Blue.MI_Blue'"));
+
+    if (FindBlue.Succeeded())
+    {
+      ATetromino::MaterialBlue = FindBlue.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Blue."));
+    }
+  }
+
+  if (!ATetromino::MaterialOrange)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindOrange(TEXT("MaterialInstanceConstant'/Game/MI_Orange.MI_Orange'"));
+
+    if (FindOrange.Succeeded())
+    {
+      ATetromino::MaterialOrange = FindOrange.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Orange."));
+    }
+  }
+
+  if (!ATetromino::MaterialYellow)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindYellow(TEXT("MaterialInstanceConstant'/Game/MI_Yellow.MI_Yellow'"));
+
+    if (FindYellow.Succeeded())
+    {
+      ATetromino::MaterialYellow = FindYellow.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Yellow."));
+    }
+  }
+
+  if (!ATetromino::MaterialGreen)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindGreen(TEXT("MaterialInstanceConstant'/Game/MI_Green.MI_Green'"));
+
+    if (FindGreen.Succeeded())
+    {
+      ATetromino::MaterialGreen = FindGreen.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Green."));
+    }
+  }
+
+  if (!ATetromino::MaterialPurple)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindPurple(TEXT("MaterialInstanceConstant'/Game/MI_Purple.MI_Purple'"));
+
+    if (FindPurple.Succeeded())
+    {
+      ATetromino::MaterialPurple = FindPurple.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Purple."));
+    }
+  }
+
+  if (!ATetromino::MaterialRed)
+  {
+    static ConstructorHelpers::FObjectFinder<UMaterialInstance> FindRed(TEXT("MaterialInstanceConstant'/Game/MI_Red.MI_Red'"));
+
+    if (FindRed.Succeeded())
+    {
+      ATetromino::MaterialRed = FindRed.Object;
+    }
+    else
+    {
+      UE_LOG(LogTemp, Error, TEXT("Couldn't find MI_Red."));
+    }
+  }
 }
 
 // Called when the game starts or when spawned
@@ -141,6 +253,11 @@ void ATetromino::SpawnCells()
 
     Cell->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 
+    if (this->Material)
+    {
+      Cell->SetMaterial(this->Material);
+    }
+
     this->Cells.Add(Cell);
   }
 }
@@ -155,6 +272,11 @@ void ATetromino::EndPlay(const EEndPlayReason::Type EndPlayReason)
 const FShape& ATetromino::GetShape() const
 {
   return this->Shape;
+}
+
+UMaterialInstance * ATetromino::GetMaterial() const
+{
+  return this->Material;
 }
 
 void ATetromino::SetCellLocations()
@@ -195,20 +317,56 @@ void ATetromino::MoveToLocation(const FVector& Location)
   this->ScheduleTranslationTo(Location);
 }
 
-void ATetromino::UpdateShape()
+void ATetromino::SetShape(EShapeType ShapeType)
 {
+  this->ShapeType = ShapeType;
   this->Reset();
   this->Shape = FShape{ this->ShapeType };
+
+  switch (this->ShapeType)
+  {
+  case EShapeType::SHAPE_I:
+    this->Material = this->MaterialCyan;
+    break;
+
+  case EShapeType::SHAPE_J:
+    this->Material = this->MaterialBlue;
+    break;
+
+  case EShapeType::SHAPE_L:
+    this->Material = this->MaterialOrange;
+    break;
+
+  case EShapeType::SHAPE_O:
+    this->Material = this->MaterialYellow;
+    break;
+
+  case EShapeType::SHAPE_S:
+    this->Material = this->MaterialGreen;
+    break;
+
+  case EShapeType::SHAPE_T:
+    this->Material = this->MaterialPurple;
+    break;
+
+  case EShapeType::SHAPE_Z:
+    this->Material = this->MaterialRed;
+    break;
+  }
+
   this->SpawnCells();
+}
+
+void ATetromino::UpdateShape()
+{
+  this->SetShape(this->ShapeType);
 }
 
 void ATetromino::SetRandomShape()
 {
   EShapeType RandomShape = static_cast<EShapeType>(FMath::RandRange(0, static_cast<int>(EShapeType::SHAPE_Z)));
 
-  this->Reset();
-  this->Shape = FShape{ RandomShape };
-  this->SpawnCells();
+  this->SetShape(RandomShape);
 }
 
 #if WITH_EDITOR

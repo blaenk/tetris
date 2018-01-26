@@ -117,7 +117,7 @@ private:
   void SetCellAtLocation(FIntPoint Location, class  ACell* Cell);
   void ClearCellAtLocation(FIntPoint Location);
   void DestroyCellAtLocation(FIntPoint Location);
-  void FillCellAtLocation(FIntPoint Location);
+  void FillCellAtLocation(FIntPoint Location, class UMaterialInstance* Material);
 
   void DrawPieceToBoard();
 
