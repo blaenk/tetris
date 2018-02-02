@@ -154,25 +154,25 @@ void ATetromino::StopRotating()
 
 void ATetromino::InterpolateTargetRotation()
 {
-  if (!this->IsRotating)
+  if (!this->IsRotating || !this->RootComponent)
   {
     return;
   }
 
-  FRotator Current = this->GetActorRotation();
+  FRotator Current = this->RootComponent->RelativeRotation;
 
   // FRotator Interpolation = FMath::RInterpConstantTo(Current, this->TargetRotation, GetWorld()->GetDeltaSeconds(), 360.0);
   FRotator Interpolation = FMath::RInterpTo(Current, this->TargetRotation, GetWorld()->GetDeltaSeconds(), 50.0);
 
   if (Interpolation.Equals(Current, 0.001))
   {
-    this->SetActorRotation(this->TargetRotation);
+    this->SetActorRelativeRotation(this->TargetRotation);
 
     this->StopRotating();
   }
   else
   {
-    this->SetActorRotation(Interpolation);
+    this->SetActorRelativeRotation(Interpolation);
   }
 }
 
@@ -190,25 +190,25 @@ void ATetromino::StopTranslating()
 
 void ATetromino::InterpolateTargetTranslation()
 {
-  if (!this->IsTranslating)
+  if (!this->IsTranslating || !this->RootComponent)
   {
     return;
   }
 
-  FVector Current = this->GetActorLocation();
+  FVector Current = this->RootComponent->RelativeLocation;
 
   // FVector Interpolation = FMath::VInterpConstantTo(Current, this->TargetLocation, GetWorld()->GetDeltaSeconds(), 360.0);
   FVector Interpolation = FMath::VInterpTo(Current, this->TargetLocation, GetWorld()->GetDeltaSeconds(), 50.0);
 
   if (Interpolation.Equals(Current, 0.001))
   {
-    this->SetActorLocation(this->TargetLocation);
+    this->SetActorRelativeLocation(this->TargetLocation);
 
     this->StopTranslating();
   }
   else
   {
-    this->SetActorLocation(Interpolation);
+    this->SetActorRelativeLocation(Interpolation);
   }
 }
 
@@ -309,7 +309,7 @@ void ATetromino::Reset()
   this->Shape.ResetRotation();
   this->StopRotating();
   this->StopTranslating();
-  this->SetActorRotation(FRotator::ZeroRotator);
+  this->SetActorRelativeRotation(FRotator::ZeroRotator);
 }
 
 void ATetromino::MoveToLocation(const FVector& Location)
