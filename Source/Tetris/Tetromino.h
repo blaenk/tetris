@@ -34,6 +34,9 @@ public:
   void MoveToLocation(const FVector& Location);
 
   UFUNCTION(BlueprintCallable)
+  void SwapLocationWithTetromino(ATetromino* Other);
+
+  UFUNCTION(BlueprintCallable)
   void Reset();
 
   UFUNCTION(BlueprintCallable)

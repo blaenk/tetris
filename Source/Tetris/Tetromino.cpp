@@ -317,6 +317,11 @@ void ATetromino::MoveToLocation(const FVector& Location)
   this->ScheduleTranslationTo(Location);
 }
 
+void ATetromino::SwapLocationWithTetromino(ATetromino* Other)
+{
+  this->MoveToLocation(Other->GetRootComponent()->RelativeLocation);
+}
+
 void ATetromino::SetShape(EShapeType ShapeType)
 {
   this->ShapeType = ShapeType;

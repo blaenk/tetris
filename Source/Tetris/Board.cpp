@@ -60,18 +60,18 @@ void ABoard::CycleTetrominoes()
   {
     ATetromino* NewLast = this->CurrentTetromino;
 
-    this->NextTetrominoes[0]->MoveToLocation(this->CurrentTetromino->GetActorLocation());
+    this->NextTetrominoes[0]->SwapLocationWithTetromino(this->CurrentTetromino);
     this->CurrentTetromino = this->NextTetrominoes[0];
     
     const int Length = this->NextTetrominoes.Num();
 
     for (int i = 1; i < Length; ++i)
     {
-      this->NextTetrominoes[i]->MoveToLocation(this->NextTetrominoes[i - 1]->GetActorLocation());
+      this->NextTetrominoes[i]->SwapLocationWithTetromino(this->NextTetrominoes[i - 1]);
       this->NextTetrominoes[i - 1] = this->NextTetrominoes[i];
     }
 
-    NewLast->MoveToLocation(this->NextTetrominoes[Length - 1]->GetActorLocation());
+    NewLast->SwapLocationWithTetromino(this->NextTetrominoes[Length - 1]);
     this->NextTetrominoes[Length - 1] = NewLast;
   }
 }
@@ -490,7 +490,7 @@ void ABoard::HoldPiece()
     if (!this->UsedHeldPiece)
     {
       // Replace (?) the current tetromino with the held piece.
-      this->CurrentTetromino->MoveToLocation(this->HeldTetromino->GetActorLocation());
+      this->CurrentTetromino->SwapLocationWithTetromino(this->HeldTetromino);
 
       ATetromino* Temporary = this->HeldTetromino;
       this->HeldTetromino = this->CurrentTetromino;
